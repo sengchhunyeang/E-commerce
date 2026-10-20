@@ -1,0 +1,6 @@
+.env
+shop.db
+__pycache__/
+venv/
+.venv/
+.vercel/

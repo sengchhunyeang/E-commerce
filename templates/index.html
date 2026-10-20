@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebShop</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo" data-link>
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="WebShop logo" class="logo-img">
+            WebShop
+        </a>
+        <ul class="nav-links">
+            <li><a href="/" data-link>Shop</a></li>
+            <li><a href="/cart" data-link>Cart <span id="cart-count" class="badge">0</span></a></li>
+            <li><a href="/orders" data-link>Orders</a></li>
+            <li><a href="/admin" data-link>Admin</a></li>
+        </ul>
+    </nav>
+
+    <main id="app" class="content">
+        <p class="muted">Loading…</p>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script>window.ORDER_STATUSES = {{ statuses | tojson }};</script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>
