@@ -34,6 +34,14 @@ bot that alerts the admin about new orders and lets them change order status.
   `python telegram_bot.py poll` deletes the production webhook; afterwards, run
   `set-webhook` again (see `deploy.md`).
 
+## Class reminder
+
+Vercel Cron (`vercel.json` → `crons`, schedule in UTC) calls
+`GET /api/telegram/class-reminder` daily at 11:30 UTC (6:30 PM Asia/Phnom_Penh).
+The endpoint posts `CLASS_REMINDER` to `CLASS_REMINDER_CHAT_ID`, the
+Python+AI-21-09-2026 group (`-1003785397029`). It rejects any request whose
+header isn't `Authorization: Bearer <CRON_SECRET>`.
+
 ## Conventions
 
 - Secrets go only in `.env` (gitignored) and in Vercel's environment variables.
@@ -58,3 +66,5 @@ DLL, so `import psycopg` fails locally. Syntax-check with
 - 2026-10: Added the Telegram bot (order alerts, status buttons, webhook and
   polling modes). Set the admin chat to the Alertbot group. Added `deploy.md`
   with the pre-push checklist and Vercel auto-deploy setup.
+- 2026-10-22: Added a daily class reminder (Google Meet link) to the class group
+  through Vercel Cron, sent 1 hour before the 7:30 PM class.

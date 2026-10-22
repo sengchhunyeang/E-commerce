@@ -20,6 +20,8 @@ features, so no GitHub Actions are needed.
    | `TELEGRAM_BOT_TOKEN` | Token from @BotFather |
    | `TELEGRAM_ADMIN_CHAT_ID` | `-1004386248183` (Alertbot group) |
    | `TELEGRAM_WEBHOOK_SECRET` | The same random string as in `.env` |
+   | `CLASS_REMINDER_CHAT_ID` | `-1003785397029` (Python+AI-21-09-2026 class group) |
+   | `CRON_SECRET` | The same random string as in `.env` |
 
 3. Deploy. Then point the bot at the live site once:
 
@@ -66,6 +68,19 @@ Telegram sends updates to **only one** place at a time.
 
 A redeploy does not change the webhook. You only need to run `set-webhook` again
 if the domain changes or you have been polling.
+
+## Class reminder (Vercel Cron)
+
+`vercel.json` → `crons` calls `GET /api/telegram/class-reminder` every day at
+**11:30 UTC (6:30 PM Cambodia time)**, one hour before the 7:30 PM class. The
+endpoint posts the Google Meet link to the class group.
+
+- Cron jobs only run on the **production** deployment. Check them under
+  Vercel → Settings → Cron Jobs, where you can also click **Run** to test.
+- On the **Hobby** (free) plan, Vercel may run the job at any time within that
+  hour (6:00–6:59 PM), but always before class. Pro runs it on the minute.
+- To change the message or link, edit `CLASS_REMINDER` in `routes/telegram.py`.
+  To change the time, edit `schedule` (in UTC). Then push.
 
 ## Rollback
 
