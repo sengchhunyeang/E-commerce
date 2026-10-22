@@ -9,3 +9,8 @@ DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if not DATABASE_URL:
     raise RuntimeError('Set DATABASE_URL (your Neon connection string) in the .env file')
+
+# Telegram bot (optional — leave the token empty to turn the bot off)
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_ADMIN_CHAT_ID = os.environ.get('TELEGRAM_ADMIN_CHAT_ID', '')
+TELEGRAM_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')

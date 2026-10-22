@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify
 
 from core.responses import found_or_404, deleted_or_404
 from core.db import Table, rpc
+from core.telegram import format_order, notify_admin
 from core.validation import ValidationError, json_body, text, email, one_of
 
 bp = Blueprint('orders', __name__, url_prefix='/api/orders')
@@ -37,7 +38,10 @@ def create_order():
                    p_customer=text(data, 'customer', 'Name', required=True),
                    p_email=email(data),
                    p_items=validate_items(data))
-    return jsonify(orders.get(order_id)), 201
+    order = orders.get(order_id)
+    notify_admin('🛒 New order\n\n' + format_order(order),
+                 [[(s.title(), f"status:{order_id}:{s}") for s in STATUSES if s != 'pending']])
+    return jsonify(order), 201
 
 
 @bp.put('/<int:order_id>')
