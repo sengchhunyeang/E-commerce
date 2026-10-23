@@ -17,7 +17,8 @@ bot that alerts the admin about new orders and lets them change order status.
 | `core/validation.py`, `core/responses.py` | Request validation and JSON error handlers. |
 | `core/telegram.py` | Telegram Bot API client using only the standard library: `api`, `send`, `notify_admin`, `format_order`. |
 | `routes/products.py`, `routes/orders.py` | REST API under `/api/products` and `/api/orders`. |
-| `routes/images.py` | Product image upload (`POST /api/images`, ≤ 4 MB, JPG/PNG/WebP/GIF), stored as `bytea` in the `images` table and served at `/api/images/<id>`. A product's `image_url` points there. |
+| `core/storage.py` | Neon Object Storage client (boto3, path-style). `upload(key, data, type)` and `download(key)`. Bucket: `S3_BUCKET` (`e-commerce`), which is **private**. |
+| `routes/images.py` | Product image upload (`POST /api/images`, ≤ 4 MB, JPG/PNG/WebP/GIF) to the bucket under `products/<uuid>.<ext>`. Images are served through the app at `/api/images/products/<file>`. A product's `image_url` points there. Older uploads in the Postgres `images` table are still served at `/api/images/<id>`. |
 | `routes/telegram.py` | Bot command handlers and the `/api/telegram/webhook` endpoint. |
 | `routes/class_reminder.py` | Class reminder settings API and the scheduler's `/run` endpoint. |
 | `routes/pages.py`, `templates/`, `static/` | The storefront page. |
@@ -60,7 +61,8 @@ bot that alerts the admin about new orders and lets them change order status.
   `.env.example` contains placeholders only.
 - Schema changes go in a new `migrations/NNN_name.sql` file. Never edit a
   migration that has already been applied.
-- `requirements.txt` stays minimal. The bot uses `urllib`, not `requests`.
+- `requirements.txt` stays minimal. The bot uses `urllib`, not `requests`;
+  `boto3` is there only for object storage.
 
 ## Deploying
 
@@ -87,3 +89,6 @@ it fails, syntax-check with `python -m py_compile ...` instead.
 - 2026-10-23: White page background. Product image upload in Admin; images
   are stored in Postgres (`migrations/003_product_images.sql`) because Vercel's
   disk is read-only.
+- 2026-10-23: Moved new image uploads to Neon Object Storage (preview
+  feature, bucket `e-commerce`). The bucket is private, so the app serves
+  images through itself. Added `boto3` to the requirements.

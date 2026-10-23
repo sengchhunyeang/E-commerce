@@ -21,6 +21,11 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    | `TELEGRAM_ADMIN_CHAT_ID` | `-1004386248183` (Alertbot group) |
    | `TELEGRAM_WEBHOOK_SECRET` | The same random string as in `.env` |
    | `CRON_SECRET` | The same random string as in `.env` |
+   | `AWS_ENDPOINT_URL_S3` | Neon storage endpoint (Neon console → Connect → Storage) |
+   | `AWS_ACCESS_KEY_ID` | Neon storage key ID (`nak_live_…`) |
+   | `AWS_SECRET_ACCESS_KEY` | Neon storage secret (`nsk_live_…`) |
+   | `AWS_REGION` | `ap-southeast-1` |
+   | `S3_BUCKET` | `e-commerce` |
 
 3. Deploy. Then point the bot at the live site once:
 

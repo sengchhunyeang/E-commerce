@@ -1,18 +1,24 @@
-"""Image uploads for products.
+"""Image uploads for products, stored in Neon Object Storage.
 
-    POST /api/images       multipart "file" -> {"url": "/api/images/7"}
-    GET  /api/images/7     the image itself
+    POST /api/images                   multipart "file" -> {"url": "/api/images/products/<uuid>.png"}
+    GET  /api/images/products/<file>   the image (read from the private bucket)
+    GET  /api/images/7                 older uploads kept in the Postgres images table
 """
+import uuid
+
 from flask import Blueprint, Response, request
 
 from core.db import query
 from core.responses import error
+from core.storage import StorageError, download, upload
 from core.validation import ValidationError
 
 bp = Blueprint('images', __name__, url_prefix='/api/images')
 
-TYPES = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
+TYPES = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif'}
 MAX_BYTES = 4 * 1024 * 1024  # Vercel rejects request bodies over 4.5 MB
+# An image never changes after upload, so browsers can cache it for good.
+CACHE = {'Cache-Control': 'public, max-age=31536000, immutable'}
 
 
 @bp.post('')
@@ -25,16 +31,29 @@ def upload_image():
     data = file.read()
     if len(data) > MAX_BYTES:
         raise ValidationError('Image must be 4 MB or smaller')
-    row = query('insert into images (content_type, data) values (%s, %s) returning id',
-                (file.mimetype, data))[0]
-    return {'url': f"/api/images/{row['id']}"}, 201
+    key = f'products/{uuid.uuid4().hex}.{TYPES[file.mimetype]}'
+    try:
+        upload(key, data, file.mimetype)
+    except StorageError as e:
+        return error(str(e), 502)
+    return {'url': f'/api/images/{key}'}, 201
+
+
+@bp.get('/products/<name>')
+def read_image(name):
+    try:
+        found = download(f'products/{name}')
+    except StorageError as e:
+        return error(str(e), 502)
+    if not found:
+        return error('Image not found', 404)
+    data, content_type = found
+    return Response(data, mimetype=content_type, headers=CACHE)
 
 
 @bp.get('/<int:image_id>')
-def read_image(image_id):
+def read_db_image(image_id):
     rows = query('select content_type, data from images where id = %s', (image_id,))
     if not rows:
         return error('Image not found', 404)
-    # An image never changes after upload, so browsers can cache it for good.
-    return Response(bytes(rows[0]['data']), mimetype=rows[0]['content_type'],
-                    headers={'Cache-Control': 'public, max-age=31536000, immutable'})
+    return Response(bytes(rows[0]['data']), mimetype=rows[0]['content_type'], headers=CACHE)

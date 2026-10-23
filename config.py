@@ -17,3 +17,6 @@ TELEGRAM_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')
 
 # The class reminder scheduler sends "Authorization: Bearer <CRON_SECRET>"
 CRON_SECRET = os.environ.get('CRON_SECRET', '')
+
+# Neon Object Storage bucket for product images. boto3 reads the AWS_* settings itself.
+S3_BUCKET = os.environ.get('S3_BUCKET', '')
