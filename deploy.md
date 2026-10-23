@@ -20,7 +20,6 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    | `TELEGRAM_BOT_TOKEN` | Token from @BotFather |
    | `TELEGRAM_ADMIN_CHAT_ID` | `-1004386248183` (Alertbot group) |
    | `TELEGRAM_WEBHOOK_SECRET` | The same random string as in `.env` |
-   | `ADMIN_PASSWORD` | Password for the Telegram settings on `/admin` (same as `.env`) |
    | `CRON_SECRET` | The same random string as in `.env` |
 
 3. Deploy. Then point the bot at the live site once:
@@ -71,7 +70,7 @@ if the domain changes or you have been polling.
 
 ## Class reminder
 
-Edit everything on the **/admin** page (unlock it with `ADMIN_PASSWORD`): the
+Edit everything on the **/admin** page (no password, so anyone with the URL can change it): the
 meeting link, alert time, class start and end times, class days, the message
 text and the group chat ID. No push is needed. The settings live in the
 `class_reminder` table, which local and production share because they use the

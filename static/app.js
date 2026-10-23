@@ -9,20 +9,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = n => '$' + Number(n).toFixed(2);
 
-// Admin password for the Telegram settings, remembered in this browser
-const adminKey = {
-    get() { try { return localStorage.getItem('adminKey') || ''; } catch { return ''; } },
-    set(value) { try { localStorage.setItem('adminKey', value); } catch { } },
-};
-
 async function api(url, options = {}) {
     const res = await fetch(url, {
         method: options.method || 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey.get() },
+        headers: { 'Content-Type': 'application/json' },
         body: options.body ? JSON.stringify(options.body) : undefined,
     });
     const data = res.status === 204 ? null : await res.json();
-    if (!res.ok) throw Object.assign(new Error(data?.error || 'Request failed'), { status: res.status });
+    if (!res.ok) throw new Error(data?.error || 'Request failed');
     return data;
 }
 
@@ -344,22 +338,7 @@ async function drawReminder() {
     try {
         s = await api('/api/class-reminder');
     } catch (err) {
-        if (err.status !== 401) {
-            box.innerHTML = `<div class="panel"><p class="warn">${esc(err.message)}</p></div>`;
-            return;
-        }
-        box.innerHTML = `
-            <form id="unlock" class="panel form">
-                <h2>Telegram class reminder</h2>
-                ${adminKey.get() ? '<p class="warn">Wrong password.</p>' : ''}
-                <label>Admin password <input name="key" type="password" required></label>
-                <button class="btn">Unlock</button>
-            </form>`;
-        box.querySelector('#unlock').addEventListener('submit', e => {
-            e.preventDefault();
-            adminKey.set(e.target.key.value);
-            drawReminder();
-        });
+        box.innerHTML = `<div class="panel"><p class="warn">${esc(err.message)}</p></div>`;
         return;
     }
 

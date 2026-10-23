@@ -10,7 +10,7 @@ from html import escape
 
 from flask import Blueprint, jsonify, request
 
-from config import ADMIN_PASSWORD, CRON_SECRET
+from config import CRON_SECRET
 from core.db import query
 from core.responses import error
 from core.telegram import TelegramError, send
@@ -94,17 +94,6 @@ def is_due(settings, now):
             and alert <= now < alert + GRACE)
 
 
-def authorized(header, secret, prefix=''):
-    return bool(secret) and hmac.compare_digest(request.headers.get(header, ''), prefix + secret)
-
-
-@bp.before_request
-def require_admin():
-    # /run is called by the scheduler with CRON_SECRET; everything else needs the admin password.
-    if request.endpoint != 'class_reminder.run' and not authorized('X-Admin-Key', ADMIN_PASSWORD):
-        return error('Admin password required', 401)
-
-
 @bp.get('')
 def read_settings():
     return jsonify(load())
@@ -130,7 +119,8 @@ def send_test():
 
 @bp.get('/run')
 def run():
-    if not authorized('Authorization', CRON_SECRET, 'Bearer '):
+    token = request.headers.get('Authorization', '')
+    if not CRON_SECRET or not hmac.compare_digest(token, f'Bearer {CRON_SECRET}'):
         return error('Unauthorized', 401)
     settings = load()
     now = datetime.now(LOCAL_TZ)

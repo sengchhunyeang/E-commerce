@@ -43,9 +43,8 @@ bot that alerts the admin about new orders and lets them change order status.
   message with `{link}` `{start}` `{end}` placeholders, and group chat ID
   (default: the Python+AI-21-09-2026 group, `-1003785397029`).
 - **Admin UI:** the "Telegram class reminder" form at the top of `/admin`
-  (`drawReminder()` in `static/app.js`). Its API, `routes/class_reminder.py`,
-  requires the `X-Admin-Key: <ADMIN_PASSWORD>` header. The browser keeps the
-  password in localStorage.
+  (`drawReminder()` in `static/app.js`). Its API is in `routes/class_reminder.py`.
+  By the user's choice, the settings API has no password, the same as the rest of `/admin`.
 - **Sending:** `.github/workflows/class-reminder.yml` calls
   `GET /api/class-reminder/run` (with `Authorization: Bearer <CRON_SECRET>`)
   every 5 minutes. `is_due()` sends once per day, within 1 hour after
@@ -81,5 +80,6 @@ it fails, syntax-check with `python -m py_compile ...` instead.
 - 2026-10-22: Added a daily class reminder (Google Meet link) to the class group
   through Vercel Cron, sent 1 hour before the 7:30 PM class.
 - 2026-10-23: Made the class reminder editable on `/admin` (link, alert time,
-  class times, days, message, chat ID; password-protected). Replaced the
-  Vercel Cron job with a GitHub Actions trigger every 5 minutes.
+  class times, days, message, chat ID). Replaced the Vercel Cron job with a
+  GitHub Actions trigger every 5 minutes. Removed the admin password at the
+  user's request.
