@@ -9,7 +9,7 @@ from html import escape
 
 from flask import Blueprint, request
 
-from config import CLASS_REMINDER_CHAT_ID, CRON_SECRET, TELEGRAM_WEBHOOK_SECRET
+from config import TELEGRAM_WEBHOOK_SECRET
 from core.db import DatabaseError
 from core.telegram import api, format_order, is_admin, keyboard, send
 from routes.orders import STATUSES, orders
@@ -25,12 +25,6 @@ HELP = """<b>WebShop bot</b>
 <b>Admin</b>
 /orders — latest orders
 /order &lt;id&gt; — order details and status buttons"""
-
-
-CLASS_REMINDER = """Dear all student here is the link to join our class
-🕖 Time: 7:30–8:30 PM
-🔗 Join Google Meet:
-https://meet.google.com/smt-tbji-hxq"""
 
 
 def status_buttons(order):
@@ -112,15 +106,3 @@ def webhook():
         # Always answer 200, or Telegram keeps retrying the same update.
         log.exception('Telegram update failed')
     return '', 200
-
-
-@bp.get('/class-reminder')
-def class_reminder():
-    """Called by Vercel Cron 1 hour before class (schedule in vercel.json)."""
-    token = request.headers.get('Authorization', '')
-    if not CRON_SECRET or not hmac.compare_digest(token, f'Bearer {CRON_SECRET}'):
-        return '', 401
-    if not CLASS_REMINDER_CHAT_ID:
-        return 'CLASS_REMINDER_CHAT_ID is not set', 500
-    send(CLASS_REMINDER_CHAT_ID, CLASS_REMINDER)
-    return 'sent', 200

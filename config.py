@@ -15,7 +15,7 @@ TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_ADMIN_CHAT_ID = os.environ.get('TELEGRAM_ADMIN_CHAT_ID', '')
 TELEGRAM_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')
 
-# Daily class reminder (sent by Vercel Cron, see vercel.json)
-CLASS_REMINDER_CHAT_ID = os.environ.get('CLASS_REMINDER_CHAT_ID', '')
-# Vercel sends "Authorization: Bearer <CRON_SECRET>" on every cron call
+# Password for the Telegram settings on /admin (sent as the X-Admin-Key header)
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
+# The class reminder scheduler sends "Authorization: Bearer <CRON_SECRET>"
 CRON_SECRET = os.environ.get('CRON_SECRET', '')

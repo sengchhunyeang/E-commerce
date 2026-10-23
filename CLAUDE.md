@@ -18,10 +18,12 @@ bot that alerts the admin about new orders and lets them change order status.
 | `core/telegram.py` | Telegram Bot API client using only the standard library: `api`, `send`, `notify_admin`, `format_order`. |
 | `routes/products.py`, `routes/orders.py` | REST API under `/api/products` and `/api/orders`. |
 | `routes/telegram.py` | Bot command handlers and the `/api/telegram/webhook` endpoint. |
+| `routes/class_reminder.py` | Class reminder settings API and the scheduler's `/run` endpoint. |
 | `routes/pages.py`, `templates/`, `static/` | The storefront page. |
 | `migrations/*.sql`, `migrate.py` | SQL migrations, applied in name order and tracked in `schema_migrations`. |
 | `telegram_bot.py` | CLI: `poll`, `set-webhook <url>`, `delete-webhook`, `info`. |
 | `vercel.json` | Sends every route to `app.py` through `@vercel/python`. |
+| `.github/workflows/class-reminder.yml` | Calls the class reminder `/run` endpoint every 5 minutes. |
 
 ## Telegram bot
 
@@ -36,11 +38,21 @@ bot that alerts the admin about new orders and lets them change order status.
 
 ## Class reminder
 
-Vercel Cron (`vercel.json` → `crons`, schedule in UTC) calls
-`GET /api/telegram/class-reminder` daily at 11:30 UTC (6:30 PM Asia/Phnom_Penh).
-The endpoint posts `CLASS_REMINDER` to `CLASS_REMINDER_CHAT_ID`, the
-Python+AI-21-09-2026 group (`-1003785397029`). It rejects any request whose
-header isn't `Authorization: Bearer <CRON_SECRET>`.
+- **Settings:** the one-row `class_reminder` table (`migrations/002_class_reminder.sql`):
+  meeting link, alert/start/end times (Cambodia time, UTC+7), ISO class days,
+  message with `{link}` `{start}` `{end}` placeholders, and group chat ID
+  (default: the Python+AI-21-09-2026 group, `-1003785397029`).
+- **Admin UI:** the "Telegram class reminder" form at the top of `/admin`
+  (`drawReminder()` in `static/app.js`). Its API, `routes/class_reminder.py`,
+  requires the `X-Admin-Key: <ADMIN_PASSWORD>` header. The browser keeps the
+  password in localStorage.
+- **Sending:** `.github/workflows/class-reminder.yml` calls
+  `GET /api/class-reminder/run` (with `Authorization: Bearer <CRON_SECRET>`)
+  every 5 minutes. `is_due()` sends once per day, within 1 hour after
+  `alert_time`, on class days only. `last_sent_on` is claimed before sending,
+  so overlapping calls can't send twice.
+- Vercel Cron isn't used because the Hobby plan only allows one fixed time a
+  day, which can't follow an alert time set in the admin page.
 
 ## Conventions
 
@@ -57,9 +69,9 @@ the checklist in [deploy.md](deploy.md).
 
 ## Known local issue
 
-On this Windows machine, an Application Control policy blocks psycopg's binary
-DLL, so `import psycopg` fails locally. Syntax-check with
-`python -m py_compile ...` instead, or test on Vercel/Linux.
+On this Windows machine, an Application Control policy has sometimes blocked
+psycopg's binary DLL, so `import psycopg` failed (it worked on 2026-10-23). If
+it fails, syntax-check with `python -m py_compile ...` instead.
 
 ## Change log
 
@@ -68,3 +80,6 @@ DLL, so `import psycopg` fails locally. Syntax-check with
   with the pre-push checklist and Vercel auto-deploy setup.
 - 2026-10-22: Added a daily class reminder (Google Meet link) to the class group
   through Vercel Cron, sent 1 hour before the 7:30 PM class.
+- 2026-10-23: Made the class reminder editable on `/admin` (link, alert time,
+  class times, days, message, chat ID; password-protected). Replaced the
+  Vercel Cron job with a GitHub Actions trigger every 5 minutes.

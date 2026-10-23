@@ -4,8 +4,5 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "app.py" }
-  ],
-  "crons": [
-    { "path": "/api/telegram/class-reminder", "schedule": "30 11 * * *" }
   ]
 }

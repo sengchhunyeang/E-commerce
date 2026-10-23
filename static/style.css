@@ -190,6 +190,19 @@ textarea {
     gap: 0 16px;
 }
 
+/* Class day checkboxes on the admin page */
+.days {
+    margin-bottom: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form .days label {
+    display: inline;
+    margin: 4px 8px 0 0;
+    font-weight: normal;
+}
+
 .btn {
     display: inline-block;
     padding: 9px 18px;

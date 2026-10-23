@@ -1,7 +1,7 @@
 from flask import Flask
 
 from core.responses import register_error_handlers
-from routes import orders, pages, products, telegram
+from routes import class_reminder, orders, pages, products, telegram
 
 
 def create_app():
@@ -9,6 +9,7 @@ def create_app():
     app.register_blueprint(products.bp)
     app.register_blueprint(orders.bp)
     app.register_blueprint(telegram.bp)
+    app.register_blueprint(class_reminder.bp)
     app.register_blueprint(pages.bp)
     register_error_handlers(app)
     return app

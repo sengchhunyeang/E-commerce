@@ -1,0 +1,19 @@
+# Pings the site every 5 minutes. The site sends the Telegram class reminder
+# only when it is due (alert time and days are set on the /admin page).
+# Needs repo secret CRON_SECRET and repo variable SITE_URL (see deploy.md).
+name: Class reminder
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send the reminder if it is due
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/class-reminder/run"

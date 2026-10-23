@@ -9,14 +9,20 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = n => '$' + Number(n).toFixed(2);
 
+// Admin password for the Telegram settings, remembered in this browser
+const adminKey = {
+    get() { try { return localStorage.getItem('adminKey') || ''; } catch { return ''; } },
+    set(value) { try { localStorage.setItem('adminKey', value); } catch { } },
+};
+
 async function api(url, options = {}) {
     const res = await fetch(url, {
         method: options.method || 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey.get() },
         body: options.body ? JSON.stringify(options.body) : undefined,
     });
     const data = res.status === 204 ? null : await res.json();
-    if (!res.ok) throw new Error(data?.error || 'Request failed');
+    if (!res.ok) throw Object.assign(new Error(data?.error || 'Request failed'), { status: res.status });
     return data;
 }
 
@@ -247,6 +253,9 @@ async function viewOrders() {
 async function viewAdmin() {
     const products = await api('/api/products');
     app.innerHTML = `
+        <h1>Admin</h1>
+        <div id="reminder"></div>
+
         <h1>Manage products</h1>
         <form id="product-form" class="panel form">
             <h2 id="form-title">Add product</h2>
@@ -282,6 +291,8 @@ async function viewAdmin() {
                 </tbody>
             </table>
         </div>`;
+
+    drawReminder();
 
     const form = $('#product-form');
     const resetForm = () => {
@@ -322,6 +333,83 @@ async function viewAdmin() {
                 viewAdmin();
             } catch (err) { toast(err.message, true); }
         }));
+}
+
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+// Telegram class reminder settings (top of the admin page)
+async function drawReminder() {
+    const box = $('#reminder');
+    let s;
+    try {
+        s = await api('/api/class-reminder');
+    } catch (err) {
+        if (err.status !== 401) {
+            box.innerHTML = `<div class="panel"><p class="warn">${esc(err.message)}</p></div>`;
+            return;
+        }
+        box.innerHTML = `
+            <form id="unlock" class="panel form">
+                <h2>Telegram class reminder</h2>
+                ${adminKey.get() ? '<p class="warn">Wrong password.</p>' : ''}
+                <label>Admin password <input name="key" type="password" required></label>
+                <button class="btn">Unlock</button>
+            </form>`;
+        box.querySelector('#unlock').addEventListener('submit', e => {
+            e.preventDefault();
+            adminKey.set(e.target.key.value);
+            drawReminder();
+        });
+        return;
+    }
+
+    box.innerHTML = `
+        <form id="reminder-form" class="panel form">
+            <h2>Telegram class reminder</h2>
+            <label><span><input type="checkbox" name="enabled" ${s.enabled ? 'checked' : ''}> Send automatically</span></label>
+            <label>Meeting link <input name="meet_link" type="url" required value="${esc(s.meet_link)}"></label>
+            <div class="form-grid">
+                <label>Alert time (bot posts at) <input name="alert_time" type="time" required value="${s.alert_time}"></label>
+                <label>Class starts <input name="start_time" type="time" required value="${s.start_time}"></label>
+                <label>Class ends <input name="end_time" type="time" required value="${s.end_time}"></label>
+                <label>Group chat ID <input name="chat_id" required value="${esc(s.chat_id)}"></label>
+            </div>
+            <div class="days">Class days
+                <div class="row">${DAYS.map((d, i) => `
+                    <label><input type="checkbox" name="days" value="${i + 1}" ${s.days.includes(i + 1) ? 'checked' : ''}> ${d}</label>`).join('')}
+                </div>
+            </div>
+            <label>Message <textarea name="message" rows="5" required>${esc(s.message)}</textarea></label>
+            <p class="muted">{link}, {start} and {end} are replaced with the meeting link and class times.
+                Times are Cambodia time (UTC+7). Last sent: ${s.last_sent_on || 'never'}.</p>
+            <div class="row">
+                <button class="btn">Save</button>
+                <button type="button" id="send-now" class="btn secondary">Send to group now</button>
+            </div>
+        </form>`;
+
+    const form = box.querySelector('#reminder-form');
+    const read = () => ({
+        ...Object.fromEntries(new FormData(form)),
+        enabled: form.enabled.checked,
+        days: [...form.querySelectorAll('[name=days]:checked')].map(c => Number(c.value)),
+    });
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        try {
+            await api('/api/class-reminder', { method: 'PUT', body: read() });
+            toast('Reminder settings saved');
+            drawReminder();
+        } catch (err) { toast(err.message, true); }
+    });
+    box.querySelector('#send-now').addEventListener('click', async () => {
+        if (!form.reportValidity() || !confirm('Send this message to the Telegram group now?')) return;
+        try {
+            await api('/api/class-reminder/test', { method: 'POST', body: read() });
+            toast('Sent to Telegram');
+        } catch (err) { toast(err.message, true); }
+    });
 }
 
 // ---------- Router ----------
