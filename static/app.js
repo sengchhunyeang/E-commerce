@@ -258,8 +258,12 @@ async function viewAdmin() {
                 <label>Name <input name="name" required></label>
                 <label>Price <input name="price" type="number" step="0.01" min="0" required></label>
                 <label>Stock <input name="stock" type="number" step="1" min="0" required></label>
-                <label>Image URL <input name="image_url" type="url" placeholder="optional"></label>
+                <label>Image URL <input name="image_url" placeholder="optional, or upload →"></label>
+                <label>Upload image
+                    <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                </label>
             </div>
+            <img id="image-preview" class="thumb preview" alt="Product image preview" hidden>
             <label>Description <textarea name="description" rows="3"></textarea></label>
             <div class="row">
                 <button class="btn">Save</button>
@@ -289,9 +293,39 @@ async function viewAdmin() {
     drawReminder();
 
     const form = $('#product-form');
+    const preview = $('#image-preview');
+    const showPreview = () => {
+        preview.hidden = !form.image_url.value;
+        if (form.image_url.value) preview.src = form.image_url.value;
+    };
+    form.image_url.addEventListener('change', showPreview);
+
+    $('#image-file').addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const save = form.querySelector('button:not([type])');
+        save.disabled = true;
+        try {
+            const body = new FormData();
+            body.append('file', file);
+            const res = await fetch('/api/images', { method: 'POST', body });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            form.image_url.value = data.url;
+            showPreview();
+            toast('Image uploaded. Click Save to keep it.');
+        } catch (err) {
+            toast(err.message, true);
+        } finally {
+            save.disabled = false;
+            e.target.value = '';
+        }
+    });
+
     const resetForm = () => {
         form.reset();
         form.id.value = '';
+        showPreview();
         $('#form-title').textContent = 'Add product';
         $('#cancel-edit').hidden = true;
     };
@@ -313,6 +347,7 @@ async function viewAdmin() {
         btn.addEventListener('click', () => {
             const p = products.find(x => x.id == btn.dataset.edit);
             for (const key of ['id', 'name', 'price', 'stock', 'image_url', 'description']) form[key].value = p[key];
+            showPreview();
             $('#form-title').textContent = `Edit product #${p.id}`;
             $('#cancel-edit').hidden = false;
             form.scrollIntoView({ behavior: 'smooth' });

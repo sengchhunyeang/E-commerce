@@ -17,6 +17,7 @@ bot that alerts the admin about new orders and lets them change order status.
 | `core/validation.py`, `core/responses.py` | Request validation and JSON error handlers. |
 | `core/telegram.py` | Telegram Bot API client using only the standard library: `api`, `send`, `notify_admin`, `format_order`. |
 | `routes/products.py`, `routes/orders.py` | REST API under `/api/products` and `/api/orders`. |
+| `routes/images.py` | Product image upload (`POST /api/images`, ≤ 4 MB, JPG/PNG/WebP/GIF), stored as `bytea` in the `images` table and served at `/api/images/<id>`. A product's `image_url` points there. |
 | `routes/telegram.py` | Bot command handlers and the `/api/telegram/webhook` endpoint. |
 | `routes/class_reminder.py` | Class reminder settings API and the scheduler's `/run` endpoint. |
 | `routes/pages.py`, `templates/`, `static/` | The storefront page. |
@@ -83,3 +84,6 @@ it fails, syntax-check with `python -m py_compile ...` instead.
   class times, days, message, chat ID). Replaced the Vercel Cron job with a
   GitHub Actions trigger every 5 minutes. Removed the admin password at the
   user's request.
+- 2026-10-23: White page background. Product image upload in Admin; images
+  are stored in Postgres (`migrations/003_product_images.sql`) because Vercel's
+  disk is read-only.

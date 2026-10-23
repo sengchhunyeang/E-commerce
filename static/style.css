@@ -316,6 +316,17 @@ textarea {
     border-radius: 10px;
 }
 
+.thumb.preview {
+    width: 160px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    border: 1px solid #e3e8f0;
+}
+
+.thumb.preview[hidden] {
+    display: none;
+}
+
 .thumb.tiny {
     width: 44px;
     border-radius: 6px;

@@ -28,3 +28,7 @@ def register_error_handlers(app):
     @app.errorhandler(DatabaseError)
     def handle_database_error(e):
         return error(e.message, e.status)
+
+    @app.errorhandler(413)
+    def handle_too_large(e):
+        return error('Upload is too large (4 MB max)', 413)
