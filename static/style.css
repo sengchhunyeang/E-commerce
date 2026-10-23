@@ -6,9 +6,9 @@
 
 body {
     font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298) fixed;
+    background: #ffffff;
     min-height: 100vh;
-    color: #ffffff;
+    color: #1f2937;
 }
 
 a {
@@ -26,7 +26,8 @@ a {
     flex-wrap: wrap;
     gap: 12px;
     padding: 16px 32px;
-    background: rgba(20, 35, 70, 0.9);
+    background: #1e3c72;
+    color: #ffffff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -113,7 +114,8 @@ h2 {
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e3e8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
     overflow-x: auto;
 }
 
@@ -167,7 +169,6 @@ textarea {
 
 #search {
     width: min(320px, 100%);
-    border: none;
 }
 
 .qty,
@@ -258,7 +259,8 @@ textarea {
     color: #1f2937;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e3e8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
     transition: transform 0.2s;
 }
 
