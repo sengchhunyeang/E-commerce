@@ -12,7 +12,7 @@ from flask import Blueprint, request
 from config import TELEGRAM_WEBHOOK_SECRET
 from core.db import DatabaseError
 from core.telegram import api, format_order, is_admin, keyboard, send
-from routes.orders import STATUSES, orders
+from routes.orders import STATUSES, orders, set_status
 from routes.products import products
 
 bp = Blueprint('telegram', __name__, url_prefix='/api/telegram')
@@ -75,7 +75,7 @@ def on_button(query):
     _, order_id, status = (query.get('data', '').split(':') + ['', ''])[:3]
     if not is_admin(chat_id) or not order_id.isdigit() or status not in STATUSES:
         return api('answerCallbackQuery', callback_query_id=query['id'], text='Not allowed')
-    order = orders.update(int(order_id), {'status': status})
+    order = set_status(int(order_id), status)
     api('answerCallbackQuery', callback_query_id=query['id'],
         text=f'Order #{order_id} → {status}' if order else 'Order not found')
     if order:

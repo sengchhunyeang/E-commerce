@@ -10,6 +10,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL', '')
 if not DATABASE_URL:
     raise RuntimeError('Set DATABASE_URL (your Neon connection string) in the .env file')
 
+# Signs the login session cookie. Any long random string; changing it signs everyone out.
+SECRET_KEY = os.environ.get('SECRET_KEY', '')
+
+if not SECRET_KEY:
+    raise RuntimeError('Set SECRET_KEY (a long random string) in the .env file')
+
 # Telegram bot (optional — leave the token empty to turn the bot off)
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_ADMIN_CHAT_ID = os.environ.get('TELEGRAM_ADMIN_CHAT_ID', '')

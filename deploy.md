@@ -17,6 +17,7 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    | Name | Value |
    | --- | --- |
    | `DATABASE_URL` | Neon **pooled** (`-pooler`) connection string |
+   | `SECRET_KEY` | Long random string (signs login cookies). Changing it signs everyone out. |
    | `TELEGRAM_BOT_TOKEN` | Token from @BotFather |
    | `TELEGRAM_ADMIN_CHAT_ID` | `-1004386248183` (Alertbot group) |
    | `TELEGRAM_WEBHOOK_SECRET` | The same random string as in `.env` |
@@ -35,6 +36,11 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    ```
 
 4. Make sure **Settings → Git → Production Branch** is `main`.
+5. Sign up on the live site, then make that account admin (once):
+
+   ```
+   python make_admin.py you@example.com
+   ```
 
 ## Before every push (checklist)
 
@@ -44,7 +50,7 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    ```
 2. **Code compiles.**
    ```
-   python -m py_compile app.py config.py telegram_bot.py migrate.py routes/*.py core/*.py
+   python -m py_compile app.py config.py telegram_bot.py migrate.py make_admin.py routes/*.py core/*.py
    ```
 3. **Dependencies.** If you imported a new package, add it to `requirements.txt`.
 4. **Database.** If you added `migrations/NNN_*.sql`, run `python migrate.py`
@@ -75,7 +81,7 @@ if the domain changes or you have been polling.
 
 ## Class reminder
 
-Edit everything on the **/admin** page (no password, so anyone with the URL can change it): the
+Edit everything on **/admin → Class reminder** (admins only): the
 meeting link, alert time, class start and end times, class days, the message
 text and the group chat ID. No push is needed. The settings live in the
 `class_reminder` table, which local and production share because they use the

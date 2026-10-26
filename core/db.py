@@ -3,6 +3,7 @@
     products = Table('products')
     products.all()            -> list of rows
     products.get(1)           -> row or None
+    products.where('stock = %s', (0,)) -> matching rows
     products.create({...})    -> new row
     products.update(1, {...}) -> updated row or None
     products.delete(1)        -> True if a row was deleted
@@ -77,6 +78,11 @@ class Table:
 
     def all(self):
         return query(sql.SQL('select {} from {} order by id desc').format(self.columns, self.table))
+
+    def where(self, condition, params=()):
+        """Rows matching a trusted SQL condition, e.g. where('user_id = %s', (5,))."""
+        return query(sql.SQL('select {} from {} where {} order by id desc').format(
+            self.columns, self.table, sql.SQL(condition)), params)
 
     def get(self, record_id):
         rows = query(sql.SQL('select {} from {} where id = %s').format(self.columns, self.table),

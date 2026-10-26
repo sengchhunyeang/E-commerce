@@ -6,26 +6,48 @@ Guidance for Claude Code (and humans) working in this repo.
 
 A small Flask shop backed by Neon Postgres, deployed on Vercel, with a Telegram
 bot that alerts the admin about new orders and lets them change order status.
+Customers sign up to check out; admins manage the shop on `/admin`.
 
 ## Layout
 
 | Path | What it does |
 | --- | --- |
 | `app.py` | `create_app()` registers the blueprints. Vercel imports the module-level `app`. |
-| `config.py` | Loads `.env`. `DATABASE_URL` is required; the `TELEGRAM_*` settings are optional. |
+| `config.py` | Loads `.env`. `DATABASE_URL` and `SECRET_KEY` are required; the `TELEGRAM_*` settings are optional. |
 | `core/db.py` | psycopg connection pool, the `Table` helper and `rpc()` for calling SQL functions. |
 | `core/validation.py`, `core/responses.py` | Request validation and JSON error handlers. |
 | `core/telegram.py` | Telegram Bot API client using only the standard library: `api`, `send`, `notify_admin`, `format_order`. |
-| `routes/products.py`, `routes/orders.py` | REST API under `/api/products` and `/api/orders`. |
+| `core/auth.py` | Password hashing (Werkzeug), `current_user()`, and the `@login_required` / `@admin_required` guards. |
+| `routes/auth.py` | `/api/auth`: signup, signin, signout, `me` (read/update profile), password. |
+| `routes/products.py` | `/api/products` (writes are admin-only) and its reviews (`/api/products/<id>/reviews`). |
+| `routes/orders.py` | `/api/orders`: checkout and `/mine` need a signed-in customer; listing all, status changes and delete are admin-only. Customers can cancel their own pending orders. |
+| `routes/categories.py`, `routes/wishlist.py` | `/api/categories` (writes admin-only) and the customer's `/api/wishlist`. |
+| `routes/admin.py` | `/api/admin`: dashboard stats, customer list, role changes. |
+| `make_admin.py` | CLI: `python make_admin.py you@example.com` makes an existing account admin (needed for the first admin). |
 | `core/storage.py` | Neon Object Storage client (boto3, path-style). `upload(key, data, type)` and `download(key)`. Bucket: `S3_BUCKET` (`e-commerce`), which is **private**. |
 | `routes/images.py` | Product image upload (`POST /api/images`, ≤ 4 MB, JPG/PNG/WebP/GIF) to the bucket under `products/<uuid>.<ext>`. Images are served through the app at `/api/images/products/<file>`. A product's `image_url` points there. Older uploads in the Postgres `images` table are still served at `/api/images/<id>`. |
 | `routes/telegram.py` | Bot command handlers and the `/api/telegram/webhook` endpoint. |
 | `routes/class_reminder.py` | Class reminder settings API and the scheduler's `/run` endpoint. |
-| `routes/pages.py`, `templates/`, `static/` | The storefront page. |
+| `routes/pages.py`, `templates/`, `static/` | The single-page storefront. `static/app.js` has a view per route: `/`, `/product/<id>`, `/cart`, `/wishlist`, `/orders`, `/signin`, `/signup`, `/account`, `/admin[/orders|products|categories|customers|reminder]`. |
 | `migrations/*.sql`, `migrate.py` | SQL migrations, applied in name order and tracked in `schema_migrations`. |
 | `telegram_bot.py` | CLI: `poll`, `set-webhook <url>`, `delete-webhook`, `info`. |
 | `vercel.json` | Sends every route to `app.py` through `@vercel/python`. |
 | `.github/workflows/class-reminder.yml` | Calls the class reminder `/run` endpoint every 5 minutes. |
+
+## Accounts
+
+- `users` table (`migrations/004_accounts_and_shop.sql`): email is unique ignoring case
+  and stored lowercased. Roles are `customer` and `admin`.
+- Login is Flask's signed session cookie (`SECRET_KEY`, 30 days, `HttpOnly`, `SameSite=Lax`,
+  `Secure` on Vercel). The cookie stores a fingerprint of the password hash, so changing the
+  password signs out every other device.
+- Every admin API is behind `@admin_required`, including image upload and the class reminder
+  settings. This replaces the old password-free `/admin` (2026-10-26).
+- Checkout requires an account; the order email is the account email. The delivery phone and
+  address are saved to the profile to prefill the next checkout. Payment is cash on delivery.
+- Order status goes through the `set_order_status()` SQL function: cancelling puts the items
+  back in stock, and a cancelled order can't be reopened. Use `set_status()` in
+  `routes/orders.py` (the Telegram buttons do too), never a plain `orders.update()`.
 
 ## Telegram bot
 
@@ -44,9 +66,9 @@ bot that alerts the admin about new orders and lets them change order status.
   meeting link, alert/start/end times (Cambodia time, UTC+7), ISO class days,
   message with `{link}` `{start}` `{end}` placeholders, and group chat ID
   (default: the Python+AI-21-09-2026 group, `-1003785397029`).
-- **Admin UI:** the "Telegram class reminder" form at the top of `/admin`
+- **Admin UI:** the "Class reminder" tab, `/admin/reminder`
   (`drawReminder()` in `static/app.js`). Its API is in `routes/class_reminder.py`.
-  By the user's choice, the settings API has no password, the same as the rest of `/admin`.
+  The settings API needs an admin login (it was open until 2026-10-26).
 - **Sending:** `.github/workflows/class-reminder.yml` calls
   `GET /api/class-reminder/run` (with `Authorization: Bearer <CRON_SECRET>`)
   every 5 minutes. `is_due()` sends once per day, within 1 hour after
@@ -92,3 +114,9 @@ it fails, syntax-check with `python -m py_compile ...` instead.
 - 2026-10-23: Moved new image uploads to Neon Object Storage (preview
   feature, bucket `e-commerce`). The bucket is private, so the app serves
   images through itself. Added `boto3` to the requirements.
+- 2026-10-26: Customer accounts (sign up / sign in, profile, password change) and
+  admin roles; every admin API now needs an admin login. Added categories, reviews
+  and ratings, wishlist, shipping details at checkout, "My orders" with cancel
+  (restocks), and an admin dashboard with tabs (stats, orders, products,
+  categories, customers, reminder). New env var `SECRET_KEY`; migration 004;
+  `make_admin.py`.

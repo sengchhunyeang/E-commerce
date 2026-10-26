@@ -8,6 +8,7 @@ import uuid
 
 from flask import Blueprint, Response, request
 
+from core.auth import admin_required
 from core.db import query
 from core.responses import error
 from core.storage import StorageError, download, upload
@@ -22,6 +23,7 @@ CACHE = {'Cache-Control': 'public, max-age=31536000, immutable'}
 
 
 @bp.post('')
+@admin_required
 def upload_image():
     file = request.files.get('file')
     if not file or not file.filename:

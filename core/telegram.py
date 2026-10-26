@@ -65,7 +65,14 @@ def notify_admin(text, buttons=None):
 
 def format_order(order):
     lines = [f"<b>Order #{order['id']}</b> — {order['status']}",
-             f"{escape(order['customer'])} &lt;{escape(order['email'])}&gt;", '']
+             f"{escape(order['customer'])} &lt;{escape(order['email'])}&gt;"]
+    if order.get('phone'):
+        lines.append(f"📞 {escape(order['phone'])}")
+    if order.get('address'):
+        lines.append(f"📍 {escape(order['address'])}")
+    if order.get('note'):
+        lines.append(f"📝 {escape(order['note'])}")
+    lines.append('')
     lines += [f"{item['qty']} × {escape(item['name'])} @ ${item['price']:.2f}"
               for item in order.get('items', [])]
     lines += ['', f"<b>Total: ${order['total']:.2f}</b>"]

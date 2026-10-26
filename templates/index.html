@@ -14,12 +14,8 @@
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="WebShop logo" class="logo-img">
             WebShop
         </a>
-        <ul class="nav-links">
-            <li><a href="/" data-link>Shop</a></li>
-            <li><a href="/cart" data-link>Cart <span id="cart-count" class="badge">0</span></a></li>
-            <li><a href="/orders" data-link>Orders</a></li>
-            <li><a href="/admin" data-link>Admin</a></li>
-        </ul>
+        <!-- Filled in by drawNav() in static/app.js (depends on who is signed in) -->
+        <ul id="nav" class="nav-links"></ul>
     </nav>
 
     <main id="app" class="content">

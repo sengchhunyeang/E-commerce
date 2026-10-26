@@ -435,3 +435,215 @@ td a {
 .toast.error {
     background: #d93025;
 }
+
+/* ---------- Accounts ---------- */
+.form.auth {
+    max-width: 420px;
+    margin: 20px auto;
+}
+
+.form.auth h1 {
+    margin-bottom: 16px;
+}
+
+.form.auth .btn {
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.hint {
+    font-weight: normal;
+    font-size: 0.8rem;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* ---------- Categories, ratings, wishlist ---------- */
+.tag {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #e6ebf5;
+    color: #1e3c72;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.detail .tag {
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.stars {
+    color: #f5a400;
+    letter-spacing: 1px;
+}
+
+.card-media {
+    position: relative;
+}
+
+.wish {
+    width: 38px;
+    height: 38px;
+    border: 1px solid #e3e8f0;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #d93025;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-media .wish {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.wish.on {
+    background: #fde0dd;
+}
+
+/* Star picker: radios in reverse so hovering a star lights it and the ones before it */
+.rating-input {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    margin-bottom: 14px;
+}
+
+.rating-input input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.form .rating-input label {
+    margin: 0;
+    padding: 0 2px;
+    font-size: 2rem;
+    color: #cfd6e4;
+    cursor: pointer;
+}
+
+.rating-input input:checked ~ label,
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #f5a400;
+}
+
+.rating-input input:focus-visible + label {
+    outline: 2px solid #2a5298;
+    border-radius: 4px;
+}
+
+.review {
+    padding: 12px 0;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.review:last-child {
+    border-bottom: none;
+}
+
+.review p {
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* ---------- Order status ---------- */
+span.status,
+.status.pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+/* ---------- Admin ---------- */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e3e8f0;
+}
+
+.tabs a {
+    padding: 10px 16px;
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    font-weight: 600;
+    color: #8a94a6;
+}
+
+.tabs a:hover {
+    color: #1e3c72;
+}
+
+.tabs a.active {
+    color: #1e3c72;
+    border-bottom-color: #2a5298;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    padding: 16px 18px;
+    border: 1px solid #e3e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.stat-value {
+    margin-top: 4px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #1e3c72;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0 20px;
+}
+
+#order-search {
+    width: min(360px, 100%);
+}
+
+.form.row {
+    display: flex;
+}
+
+.form.row input {
+    flex: 1;
+    min-width: 200px;
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        padding: 12px 16px;
+    }
+
+    .nav-links a {
+        padding: 6px 10px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+}

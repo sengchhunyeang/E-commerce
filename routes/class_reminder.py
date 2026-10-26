@@ -11,6 +11,7 @@ from html import escape
 from flask import Blueprint, jsonify, request
 
 from config import CRON_SECRET
+from core.auth import admin_required
 from core.db import query
 from core.responses import error
 from core.telegram import TelegramError, send
@@ -95,11 +96,13 @@ def is_due(settings, now):
 
 
 @bp.get('')
+@admin_required
 def read_settings():
     return jsonify(load())
 
 
 @bp.put('')
+@admin_required
 def update_settings():
     load()
     query(UPDATE, validate(json_body()))
@@ -107,6 +110,7 @@ def update_settings():
 
 
 @bp.post('/test')
+@admin_required
 def send_test():
     """Send the message in the form right now (without saving it)."""
     settings = validate(json_body())
