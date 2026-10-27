@@ -2,7 +2,7 @@
 
     @login_required   -> 401 unless someone is signed in
     @admin_required   -> 401 / 403 unless an admin is signed in
-    current_user()    -> {"id", "name", "email", "role", "phone", "address"} or None
+    current_user()    -> {"id", "name", "email", "role", "phone", "address", "telegram"} or None
 
 The session cookie holds the user id plus a fingerprint of the password hash,
 so changing the password signs out every other device.
@@ -16,7 +16,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from core.db import query
 from core.responses import error
 
-USER = 'select id, name, email, role, phone, address, password_hash from users where {} = %s'
+USER = ('select id, name, email, role, phone, address, telegram_chat_id is not null as telegram, '
+        'password_hash from users where {} = %s')
 
 
 def hash_password(password):

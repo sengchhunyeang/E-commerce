@@ -8,6 +8,8 @@
     products.update(1, {...}) -> updated row or None
     products.delete(1)        -> True if a row was deleted
 """
+import time
+import weakref
 from datetime import datetime
 from decimal import Decimal
 
@@ -19,11 +21,27 @@ from psycopg_pool import ConnectionPool, PoolTimeout
 
 from config import DATABASE_URL
 
-# Neon closes idle connections, so check each one before handing it out.
+_returned_at = weakref.WeakKeyDictionary()  # connection -> when it went back to the pool
+FRESH_SECONDS = 30
+
+
+def _check(conn):
+    """Neon closes idle connections, so test one that sat unused for a while.
+    A connection used in the last few seconds is handed out without the extra round trip."""
+    if time.monotonic() - _returned_at.get(conn, 0) > FRESH_SECONDS:
+        ConnectionPool.check_connection(conn)
+
+
+def _returned(conn):
+    _returned_at[conn] = time.monotonic()
+
+
+# Every query() is a single statement, so autocommit saves the BEGIN/COMMIT round trips
+# (statements, including function calls like place_order, are still atomic).
 # prepare_threshold=None keeps it compatible with Neon's pooled (-pooler) endpoint.
 pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=5, open=True,
-                      check=ConnectionPool.check_connection,
-                      kwargs={'row_factory': dict_row, 'prepare_threshold': None})
+                      check=_check, reset=_returned,
+                      kwargs={'row_factory': dict_row, 'prepare_threshold': None, 'autocommit': True})
 
 
 class DatabaseError(Exception):

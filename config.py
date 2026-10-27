@@ -26,3 +26,7 @@ CRON_SECRET = os.environ.get('CRON_SECRET', '')
 
 # Neon Object Storage bucket for product images. boto3 reads the AWS_* settings itself.
 S3_BUCKET = os.environ.get('S3_BUCKET', '')
+
+# Password reset emails through Resend (optional — without it, reset links go only to Telegram)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+MAIL_FROM = os.environ.get('MAIL_FROM', '')  # e.g. "WebShop <shop@yourdomain.com>"

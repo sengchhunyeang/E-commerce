@@ -2,6 +2,7 @@
 
     send('123456', 'Hello')          -> send a message to a chat
     notify_admin('New order #5')     -> message TELEGRAM_ADMIN_CHAT_ID, never raises
+    notify(chat_id, 'Shipped!')      -> message any chat (e.g. a customer), never raises
 """
 import json
 import logging
@@ -53,14 +54,36 @@ def is_admin(chat_id):
     return bool(TELEGRAM_ADMIN_CHAT_ID) and str(chat_id) == TELEGRAM_ADMIN_CHAT_ID
 
 
-def notify_admin(text, buttons=None):
-    """Best effort: a Telegram outage must never break checkout."""
-    if not (TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID):
+def notify(chat_id, text, buttons=None):
+    """Best effort: a Telegram outage must never break checkout or a status change."""
+    if not (TELEGRAM_BOT_TOKEN and chat_id):
         return
     try:
-        send(TELEGRAM_ADMIN_CHAT_ID, text, buttons)
+        send(chat_id, text, buttons)
     except TelegramError as e:
-        log.warning('Telegram notification failed: %s', e)
+        log.warning('Telegram notification to %s failed: %s', chat_id, e)
+
+
+def notify_admin(text, buttons=None):
+    notify(TELEGRAM_ADMIN_CHAT_ID, text, buttons)
+
+
+_username = None
+
+
+def bot_username():
+    """The bot's @username (for t.me links), or '' when the bot is off or unreachable."""
+    global _username
+    if _username is None and TELEGRAM_BOT_TOKEN:
+        try:
+            _username = api('getMe')['username']
+        except TelegramError as e:
+            log.warning('getMe failed: %s', e)
+            return ''
+    return _username or ''
+
+
+PAYMENT = {'cod': 'Cash on delivery', 'bank': 'Bank transfer'}
 
 
 def format_order(order):
@@ -75,5 +98,15 @@ def format_order(order):
     lines.append('')
     lines += [f"{item['qty']} × {escape(item['name'])} @ ${item['price']:.2f}"
               for item in order.get('items', [])]
-    lines += ['', f"<b>Total: ${order['total']:.2f}</b>"]
+    lines.append('')
+    if order.get('discount'):
+        lines.append(f"Discount ({escape(order.get('coupon_code') or '')}): −${order['discount']:.2f}")
+    if order.get('shipping_fee'):
+        lines.append(f"Shipping: ${order['shipping_fee']:.2f}")
+    if order.get('tax'):
+        lines.append(f"Tax: ${order['tax']:.2f}")
+    lines.append(f"<b>Total: ${order['total']:.2f}</b>")
+    if order.get('payment_method'):
+        lines.append(f"💳 {PAYMENT.get(order['payment_method'], order['payment_method'])}"
+                     f" — {order.get('payment_status', 'unpaid')}")
     return '\n'.join(lines)

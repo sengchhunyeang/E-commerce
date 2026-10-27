@@ -1,7 +1,9 @@
 """Telegram bot: Telegram POSTs every message to /api/telegram/webhook.
 
-Anyone can browse products. The admin chat (TELEGRAM_ADMIN_CHAT_ID) can
-also list orders and change their status with buttons.
+Anyone can browse products. Customers connect their account from the
+account page (a t.me/<bot>?start=<token> link) to get order updates.
+The admin chat (TELEGRAM_ADMIN_CHAT_ID) can also list orders, change their
+status and confirm bank payments with buttons.
 """
 import hmac
 import logging
@@ -10,9 +12,9 @@ from html import escape
 from flask import Blueprint, request
 
 from config import TELEGRAM_WEBHOOK_SECRET
-from core.db import DatabaseError
+from core.db import DatabaseError, query
 from core.telegram import api, format_order, is_admin, keyboard, send
-from routes.orders import STATUSES, orders, set_status
+from routes.orders import STATUSES, orders, set_payment, set_status
 from routes.products import products
 
 bp = Blueprint('telegram', __name__, url_prefix='/api/telegram')
@@ -28,7 +30,22 @@ HELP = """<b>WebShop bot</b>
 
 
 def status_buttons(order):
-    return [[(s.title(), f"status:{order['id']}:{s}") for s in STATUSES if s != order['status']]]
+    buttons = [[(s.title(), f"status:{order['id']}:{s}") for s in STATUSES if s != order['status']]]
+    if order.get('payment_status') != 'paid' and order['status'] != 'cancelled':
+        buttons.append([('Confirm payment', f"paid:{order['id']}")])
+    return buttons
+
+
+def cmd_start(chat_id, arg):
+    """/start <token> from the "Connect Telegram" link on the account page."""
+    if arg:
+        rows = query('update users set telegram_chat_id = %s, telegram_link_token = null '
+                     'where telegram_link_token = %s returning name', (chat_id, arg))
+        if rows:
+            return send(chat_id, f"✅ Connected, {escape(rows[0]['name'])}! "
+                                 "You'll get a message here when your orders change.")
+        send(chat_id, 'That link has expired. Open your account page and press "Connect Telegram" again.')
+    send(chat_id, HELP)
 
 
 def cmd_products(chat_id, arg):
@@ -52,7 +69,7 @@ def cmd_order(chat_id, arg):
         send(chat_id, 'Usage: /order &lt;id&gt; (order not found)')
 
 
-PUBLIC = {'/start': lambda c, a: send(c, HELP), '/help': lambda c, a: send(c, HELP),
+PUBLIC = {'/start': cmd_start, '/help': lambda c, a: send(c, HELP),
           '/products': cmd_products, '/myid': lambda c, a: send(c, f'Your chat ID: <code>{c}</code>')}
 ADMIN = {'/orders': cmd_orders, '/order': cmd_order}
 
@@ -72,12 +89,16 @@ def on_message(message):
 def on_button(query):
     """Admin pressed a status button under an order."""
     chat_id = query['message']['chat']['id']
-    _, order_id, status = (query.get('data', '').split(':') + ['', ''])[:3]
-    if not is_admin(chat_id) or not order_id.isdigit() or status not in STATUSES:
+    action, order_id, status = (query.get('data', '').split(':') + ['', ''])[:3]
+    if not is_admin(chat_id) or not order_id.isdigit() or not (
+            (action == 'status' and status in STATUSES) or action == 'paid'):
         return api('answerCallbackQuery', callback_query_id=query['id'], text='Not allowed')
-    order = set_status(int(order_id), status)
+    if action == 'paid':
+        order, done = set_payment(int(order_id), 'paid'), 'payment confirmed'
+    else:
+        order, done = set_status(int(order_id), status), status
     api('answerCallbackQuery', callback_query_id=query['id'],
-        text=f'Order #{order_id} → {status}' if order else 'Order not found')
+        text=f'Order #{order_id} → {done}' if order else 'Order not found')
     if order:
         api('editMessageText', chat_id=chat_id, message_id=query['message']['message_id'],
             text=format_order(order), parse_mode='HTML', reply_markup=keyboard(status_buttons(order)))

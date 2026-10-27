@@ -68,6 +68,21 @@ a {
     background: rgba(255, 255, 255, 0.15);
 }
 
+.nav-signout {
+    padding: 7px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    background: none;
+    color: #ffffff;
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-signout:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
 .nav-links a.active {
     background: #ffffff;
     color: #1e3c72;
@@ -634,7 +649,433 @@ span.status,
     min-width: 200px;
 }
 
+/* ---------- Sales, gallery, options ---------- */
+.was {
+    margin-left: 6px;
+    color: #8a94a6;
+    font-weight: normal;
+    font-size: 0.85em;
+}
+
+.sale-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: #d93025;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.sale-tag {
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: #fde0dd;
+    color: #a52714;
+    font-size: 0.75rem;
+}
+
+.gallery-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.gallery-thumbs button {
+    width: 64px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+}
+
+.gallery-thumbs button.active {
+    border-color: #2a5298;
+}
+
+.gallery-thumbs img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+.option-picker select {
+    max-width: 320px;
+}
+
+.form .sub {
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px dashed #cfd6e4;
+    border-radius: 8px;
+}
+
+.form .sub > strong {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.form label.inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+}
+
+.variant-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.gallery-edit {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.gallery-item {
+    position: relative;
+    width: 90px;
+}
+
+.gallery-item img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e3e8f0;
+}
+
+.gallery-item button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 0 7px;
+}
+
+/* ---------- Checkout, charges, payment ---------- */
+.coupon {
+    margin-top: 16px;
+}
+
+.coupon input {
+    width: 180px;
+    text-transform: uppercase;
+}
+
+.good {
+    color: #1f9d55;
+    font-size: 0.9rem;
+}
+
+.summary {
+    max-width: 320px;
+    margin: 14px 0 0 auto;
+}
+
+.sum-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.sum-row.good {
+    font-size: inherit;
+}
+
+.sum-row.grand {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #e3e8f0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.pay-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form .pay-methods label {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: normal;
+    white-space: normal;
+}
+
+.pay {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #edf0f5;
+}
+
+.pay.submitted { background: #fff4d6; }
+.pay.paid      { background: #dcf5e3; }
+
+.order-foot {
+    margin-top: 14px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.pay-box {
+    border-color: #ffd36b;
+}
+
+.bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.bank p {
+    margin-bottom: 6px;
+}
+
+.qr {
+    width: 180px;
+    border-radius: 8px;
+    border: 1px solid #e3e8f0;
+}
+
+.qr[hidden] {
+    display: none;
+}
+
+/* Order tracking */
+.timeline {
+    list-style: none;
+    border-left: 2px solid #e3e8f0;
+    margin-left: 8px;
+}
+
+.timeline li {
+    position: relative;
+    padding: 0 0 16px 20px;
+}
+
+.timeline li::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #2a5298;
+}
+
+.timeline li.todo {
+    color: #8a94a6;
+}
+
+.timeline li.todo::before {
+    background: #ffffff;
+    border: 2px solid #cfd6e4;
+}
+
+.timeline time {
+    display: block;
+    color: #8a94a6;
+    font-size: 0.85rem;
+}
+
+/* Invoice */
+.invoice-head {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #1e3c72;
+}
+
+.invoice-head h1 {
+    margin-bottom: 6px;
+    color: #1e3c72;
+}
+
+.shop-info {
+    text-align: right;
+}
+
+.invoice .two-col p {
+    line-height: 1.5;
+}
+
+.thanks {
+    margin-top: 24px;
+    text-align: center;
+}
+
+@media print {
+    .navbar,
+    .no-print,
+    .toast {
+        display: none !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .panel {
+        border: none;
+        box-shadow: none;
+    }
+}
+
+/* ---------- Admin: filters, pager, coupons, reports ---------- */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.filters input[type=search] {
+    flex: 1;
+    min-width: 220px;
+}
+
+.filters label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.pager {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+}
+
+.panel.alert {
+    display: block;
+    background: #fff4d6;
+    border-color: #ffd36b;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.coupon-state {
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #edf0f5;
+    color: #5b6578;
+}
+
+.coupon-state.active { background: #dcf5e3; color: #17663a; }
+
+.chart-wrap {
+    position: relative;
+}
+
+.chart {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.chart .grid {
+    stroke: #edf0f5;
+    stroke-width: 1;
+}
+
+.chart .axis {
+    fill: #8a94a6;
+    font-size: 11px;
+}
+
+.chart .bar {
+    fill: #2a5298;
+}
+
+.chart .bar.on {
+    fill: #1e3c72;
+}
+
+.chart .hit {
+    fill: transparent;
+    cursor: crosshair;
+}
+
+.chart-tip {
+    position: absolute;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #1f2937;
+    color: #ffffff;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.table-view {
+    margin-top: 10px;
+}
+
+.table-view summary {
+    cursor: pointer;
+    color: #2a5298;
+    font-size: 0.9rem;
+}
+
+.hbar-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.hbar {
+    height: 8px;
+    margin-top: 4px;
+    border-radius: 4px;
+    background: #edf0f5;
+}
+
+.hbar div {
+    height: 100%;
+    border-radius: 4px;
+    background: #2a5298;
+}
+
 @media (max-width: 600px) {
+    .variant-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
     .navbar {
         padding: 12px 16px;
     }
@@ -646,4 +1087,58 @@ span.status,
     h1 {
         font-size: 1.6rem;
     }
+}
+
+/* ---------- Skeleton loading ---------- */
+.skeleton .card:hover {
+    transform: none;
+}
+
+.sk {
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e4e9f1 25%, #f2f5fa 50%, #e4e9f1 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.sk-line {
+    height: 12px;
+    margin: 6px 0;
+}
+
+.sk-title {
+    width: 180px;
+    max-width: 60%;
+    height: 28px;
+    margin: 4px 0 18px;
+}
+
+.sk-media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 0;
+}
+
+.sk-media.large {
+    border-radius: 10px;
+}
+
+.sk-btn {
+    width: 100%;
+    height: 38px;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+.skeleton .panel + .panel {
+    margin-top: 16px;
+}
+
+@keyframes shimmer {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sk { animation: none; }
 }

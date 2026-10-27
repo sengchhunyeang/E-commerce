@@ -5,8 +5,8 @@ from flask import Flask
 
 from config import SECRET_KEY
 from core.responses import register_error_handlers
-from routes import (admin, auth, categories, class_reminder, images, orders, pages, products,
-                    telegram, wishlist)
+from routes import (admin, auth, categories, class_reminder, coupons, images, orders, pages,
+                    products, settings, telegram, wishlist)
 
 
 def create_app():
@@ -21,6 +21,8 @@ def create_app():
     app.register_blueprint(auth.bp)
     app.register_blueprint(products.bp)
     app.register_blueprint(categories.bp)
+    app.register_blueprint(coupons.bp)
+    app.register_blueprint(settings.bp)
     app.register_blueprint(images.bp)
     app.register_blueprint(orders.bp)
     app.register_blueprint(wishlist.bp)

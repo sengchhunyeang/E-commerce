@@ -5,17 +5,22 @@
     DELETE /api/wishlist/<id>   remove it
 """
 from flask import Blueprint, jsonify
+from psycopg import sql
 
 from core.auth import current_user, login_required
 from core.db import query
 from core.responses import error
+from routes.products import products
 
 bp = Blueprint('wishlist', __name__, url_prefix='/api/wishlist')
 
 
 def saved_products():
-    return query("""select p.* from wishlist w join products p on p.id = w.product_id
-                    where w.user_id = %s order by w.created_at desc""", (current_user()['id'],))
+    # Same fields as /api/products (rating, variants, ...)
+    return query(sql.SQL("""select p.* from wishlist w
+                            join lateral (select {} from products where products.id = w.product_id) p on true
+                            where w.user_id = %s order by w.created_at desc""").format(products.columns),
+                 (current_user()['id'],))
 
 
 @bp.get('')

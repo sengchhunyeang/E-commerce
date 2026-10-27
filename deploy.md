@@ -27,6 +27,8 @@ features. GitHub Actions is used only to trigger the class reminder (see below).
    | `AWS_SECRET_ACCESS_KEY` | Neon storage secret (`nsk_live_…`) |
    | `AWS_REGION` | `ap-southeast-1` |
    | `S3_BUCKET` | `e-commerce` |
+   | `RESEND_API_KEY` | Optional: resend.com API key for password reset emails |
+   | `MAIL_FROM` | Optional: sender, e.g. `WebShop <shop@yourdomain.com>` (verified domain in Resend) |
 
 3. Deploy. Then point the bot at the live site once:
 
